@@ -1,0 +1,106 @@
+program practica6;
+USES dos, Sysutils; //importes fecha
+
+TYPE
+  tCoche = RECORD
+    numMatricula: String[7];
+    tiempoEst: String[100];
+    distintivo: String[20];
+
+  END;
+
+  tPlaza = RECORD
+    tamanio: boolean; //1 grande y 0 pequenia
+    ocupado: boolean;
+    coche: tCoche;
+    numPlaza: ARRAY [1 .. 2] OF integer; //primera posicion fila y segunda planta
+  END;
+
+tArrGaraje = ARRAY [1 .. 2] OF integer;
+
+tGaraje = RECORD
+  plaza: tPlaza;
+  tamanio: tArrGaraje;
+  END;
+
+tFichero = FILE OF tPlaza;
+
+VAR
+  coche: tCoche;
+  plaza: tPlaza;
+  fichero: tFichero;
+  i, j: integer;
+  garaje: tGaraje;
+
+PROCEDURE entradaVehiculo(VAR fichero: tFichero);
+
+VAR
+  textAux: text;
+  binAux: tPlaza;
+  fechaEntrada: String[100];
+  hour, min, secs, secs100: word;
+  year, month, day, week: word;
+  auxGaraje: tGaraje;
+  j, i: integer;
+
+BEGIN {entradaVehiculo}
+  {$I-}
+       RESET(fichero);
+  {$I+}
+
+  IF (IORESULT = 0) THEN BEGIN
+
+  writeln('Introduce los datos del vehiculo');
+  writeln('Introduce la matricula del vehiculo');
+  readln(binAux.coche.numMatricula);
+  writeln('Introduce el distintivo del vehiculo');
+  readln(binAux.coche.distintivo);
+
+  GetDate(year, month, day, week);
+  GetTime(hour, min, secs, secs100);
+  binAux.coche.tiempoEst := IntToStr(day) + '-' + IntToStr(month) + '-' + IntToStr(year) + '-' + IntToStr(hour) + '-' + IntToStr(min);
+
+  FOR i := 1 to 20 DO BEGIN
+    FOR j := 1 TO 4 DO BEGIN
+      IF (auxGaraje.plaza.ocupado = FALSE) THEN BEGIN
+         auxGaraje.plaza.ocupado := TRUE;
+         binAux.numPlaza := [i, j];
+
+
+      END;
+    END;
+
+  END;
+  write(fichero, binAux);
+
+  END
+
+  ELSE
+      REWRITE(fichero);
+
+END; {entradaVehiculo}
+
+PROCEDURE mostrarPlano(VAR fichero: tFichero);
+VAR
+
+
+BEGIN
+  FOR i := 1
+
+
+
+END;
+
+BEGIN {PP}
+
+ASSIGN(fichero, 'fichero.dat');
+
+FOR i := 1 to 20 DO BEGIN
+    FOR j := 1 TO 4 DO
+      garaje.plaza.ocupado = FALSE;
+END;
+
+//inicializar array
+end;
+
+END.

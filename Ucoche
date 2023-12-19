@@ -1,0 +1,45 @@
+unit Ucoche;
+
+{$mode ObjFPC}{$H+}
+
+interface
+
+uses
+  dos,SysUtils;
+
+type
+  intervalo = 1..4;
+  tCoche = RECORD
+    numMatricula: String[7];
+    tiempoEst: String[100];
+    distintivo: string[20];
+
+  END;
+
+ //PROCEDURE EntradaVehiculo(VAR fichero: tFichero);
+ PROCEDURE AsignarCoche(VAR coche1: tCoche; VAR coche2: tCoche);
+ PROCEDURE CrearCoche(VAR coche: tCoche; VAR numMat: string;VAR distintivo: string);
+
+
+implementation
+PROCEDURE AsignarCoche(VAR coche1: tCoche; VAR coche2: tCoche);
+BEGIN
+  coche1.numMatricula:= coche2.numMatricula;
+  coche1.tiempoEst:= coche2.tiempoEst;
+  coche1.distintivo:= coche2.distintivo;
+END;
+
+
+PROCEDURE CrearCoche(VAR coche: tCoche; VAR numMat: string;VAR distintivo: string);
+VAR
+  year, month, day, week, hour, min, secs, secs100: word;
+
+BEGIN
+  coche.numMatricula:= numMat;
+  GetDate(year, month, day, week);
+  GetTime(hour, min, secs, secs100);
+  coche.tiempoEst := IntToStr(day) + '-' + IntToStr(month) + '-' + IntToStr(year) + '-' + IntToStr(hour) + '-' + IntToStr(min);
+  coche.distintivo:= distintivo;
+END;
+
+end.

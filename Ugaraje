@@ -1,0 +1,60 @@
+unit Ugaraje;
+
+{$mode ObjFPC}{$H+}
+
+interface
+
+uses
+  dos, Uplaza, Ucoche, SysUtils;
+
+CONST
+  PisoIni= 1;
+  PisoFin= 4;
+  PlazaIni= 1;
+  PlazaFin= 20;
+
+TYPE
+  tGaraje =  ARRAY [PisoIni..PisoFin,PlazaIni..PlazaFin] of tPlaza;
+  PROCEDURE CrearGarajeVacio(VAR garaje: tGaraje);
+  PROCEDURE MostrarGaraje(garaje:tGaraje);
+
+
+
+
+implementation
+PROCEDURE CrearGarajeVacio(VAR garaje: tGaraje);
+VAR
+  aux,aux1: integer;
+BEGIN
+  for aux:= 1 to 4 do
+      begin
+      for aux1:= 1 to 20 do
+          begin
+               PonerPlazaVacia(garaje[aux,aux1],aux,aux1);
+
+          end;
+      end;
+END;
+
+PROCEDURE MostrarGaraje(garaje:tGaraje);
+VAR
+  aux,aux1: integer;
+BEGIN
+  for aux:= 1 to 4 do
+      begin
+      writeln('planta', aux-1);
+      for aux1:= 1 to 20 do
+          begin
+               if(garaje[aux,aux1].tamanio) then
+               write('| x | ')
+               else
+               write('|x| ');
+               if (aux1 = 20) then
+               writeln;
+
+
+          end;
+      end;
+END;
+
+end.

@@ -15,12 +15,12 @@ TYPE
   END;
 
   tGanancias = RECORD
-      gananciaTotal: integer;
+      gananciaTotal: real;
   END;
 
   PROCEDURE PonerPlazaVacia(VAR plaza:tPlaza; aux: integer; aux1: integer);
   PROCEDURE Aparcar(VAR plaza:tPlaza; VAR coche: tCoche);
-  PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer);
+  PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer; VAR tGanancias: tGanancias);
 
 
 implementation
@@ -36,17 +36,21 @@ BEGIN
       plaza.tamanio:= false;
 END;
 
-PROCEDURE Aparcar(VAR plaza:tPlaza; VAR coche: tCoche);
+PROCEDURE Aparcar(VAR plaza:tPlaza; VAR coche: tCoche; VAR tamanio: string);
+VAR
+  aux, aux1: integer;
 BEGIN
+  IF tamanio = 0 THEN BEGIN
+
   plaza.ocupado:= true;
   AsignarCoche(plaza.coche,coche);
 END;
 
 
-PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer; VAR ganancias: tGanancias); //ojo con si es grande o pequenia que es diferente precio
+PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer; VAR tGanancias: tGanancias); //ojo con si es grande o pequenia que es diferente precio
 VAR
   opcion: String;
-  minutos, precioEstacionar: integer;
+  minutos, precioEstacionar: real;
 BEGIN
   precioEstacionar := 0;
 
@@ -66,18 +70,18 @@ BEGIN
 
   IF (opcion = 'grande') THEN BEGIN
      IF (minutos > 60) THEN
-        precioEstacionar := 0,02 * minutos
+        precioEstacionar := (0.02 * minutos)
      ELSE
-        precioEstacionar := 0,06 * minutos;
+        precioEstacionar := (0.06 * minutos);
   END
 
   ELSE //la opcion es 'pequenia'
   IF (minutos > 60) THEN
-     precioEstacionar := 0,01 * minutos
+     precioEstacionar := 0.01 * minutos
   ELSE
-      precioEstacionar := 0,04 * minutos;
+      precioEstacionar := 0.04 * minutos;
 
-  ganancias := ganancias + precioEstacionar;
+  tGanancias.gananciaTotal := tGanancias.gananciaTotal + precioEstacionar;
 
 END;
 

@@ -7,7 +7,9 @@ uses
 
 VAR
   garaje:tGaraje;
-  opcion: integer;
+  opcion, minutos, tamanioCoche: integer;
+  numMat, distintivo: string;
+
 
 PROCEDURE Menu();
 BEGIN
@@ -35,8 +37,25 @@ begin
     CrearGarajeVacio(garaje);
     IF (opcion <> 8) THEN BEGIN
       CASE opcion OF
-           1: EntradaVehiculo(fichero);
-           2: Salir(plaza, matricula, aux, aux1);
+           1: IF HayPlazas(garaje, tamanio) THEN BEGIN
+                writeln('Introduce la matricula');
+                readln(numMat);
+                writeln('Introduce el distintivo');
+                readln(distintivo);
+                CrearCoche(coche, numMat, distintivo);
+                writeln('Introduce el tamanio del coche, 0 si es pequenio y 1 si es grande');
+                readln(tamanioCoche);
+                Aparcar(plaza, coche, tamanioCoche);
+                EntradaVehiculo(fichero);
+              END
+              ELSE
+                  writeln('En este momento no hay plazas libres en el garaje');
+
+           end;
+
+           2: readln(tamanioCoche);
+              readln(minutos);
+             Salir(plaza, matricula, aux, aux1);
            3: MostrarGaraje(garaje);
            4: ;
            5: ;

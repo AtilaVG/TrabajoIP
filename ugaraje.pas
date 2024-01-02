@@ -50,10 +50,18 @@ BEGIN
       writeln('planta', aux-1);
       for aux1:= 1 to 20 do
           begin
-               if(garaje[aux,aux1].tamanio) then
-               write('| x | ')
+               if(garaje[aux,aux1].tamanio) then begin
+               if (garaje[aux, aux1].ocupado) then
+                  write('| x | ')
                else
-               write('|x| ');
+                  write('|   |');
+
+               end
+               else
+               if (garaje[aux, aux1].ocupado) then
+                  write('|x| ')
+               else
+                  write('| |');
                if (aux1 = 20) then
                writeln;
 
@@ -98,9 +106,58 @@ BEGIN
   readln(tam);
   HayPlazas(garaje, tamanio);
 
-  CrearCoche(coche, numMat, distintivo);
-  AsignarCoche(coche1, coche2);
 END;
+
+
+PROCEDURE PorcentajeOcupacion(garaje:tGaraje);
+VAR
+  aux,aux1, cont, cont2: integer; //cont1 numerador, cont2 denominador
+  porcentaje: real;
+BEGIN
+  cont, cont2 := 0;
+  for aux:= 4 downto 1 do
+      begin
+
+      for aux1:= 1 to 20 do
+          begin
+
+               if (garaje[aux, aux1].ocupado) then begin
+                  cont := cont + 1;
+               end
+
+          end;
+      end;
+  porcentaje := cont1 / 80;
+END;
+
+
+PROCEDURE BuscarPlaza(garaje: tGaraje);
+VAR
+  aux,aux1: integer;
+BEGIN
+  HayPlazas := false;
+  REPEAT
+    aux := aux -1;
+    REPEAT
+      aux1 := aux1 + 1;
+      IF (garaje[aux, aux1].ocupado = false) THEN
+         if (tamanio = 'grande') then begin
+             if (((aux-1)*20+aux1) mod 6 = 0)then //es grande
+                HayPlazas := true
+                Aparcar(plaza, coche, tamanio, aux, aux1);
+             else
+                HayPlazas := false;
+         end
+         else
+             if (((aux-1)*20+aux1) mod 6 <> 0)then //es pequenio
+                HayPlazas := true
+             else
+                HayPlazas := false;
+
+    until (aux1 = 20) OR (garaje[aux, aux1].ocupado = false);
+  until (aux = 4) OR (garaje[aux, aux1].ocupado = false);
+
+end;
 
 
 end.

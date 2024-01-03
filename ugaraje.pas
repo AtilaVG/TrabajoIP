@@ -20,6 +20,8 @@ TYPE
   PROCEDURE EntradaVehiculo(VAR fichero: tFichero);
   PROCEDURE CrearGarajeVacio(VAR garaje: tGaraje);
   PROCEDURE MostrarGaraje(garaje:tGaraje);
+  PROCEDURE PorcentajeOcupacion(garaje:tGaraje);
+  PROCEDURE Distintivo(VAR coche: tCoche, VAR distintivo: string);
 
 
 
@@ -156,6 +158,31 @@ BEGIN
 
     until (aux1 = 20) OR (garaje[aux, aux1].ocupado = false);
   until (aux = 4) OR (garaje[aux, aux1].ocupado = false);
+
+end;
+
+
+
+PROCEDURE Distintivo(VAR garaje:tGaraje, VAR distintivo: string);
+VAR
+  aux,aux1,contador: integer;
+begin
+  contador:= 0;
+   for aux:= 1 to 4 do
+      begin
+      for aux1:= 1 to 20 do
+          begin
+               if(garaje[aux,aux1].coche.distintivo = distintivo) then
+                  contador:= contador + 1;
+
+
+
+          end;
+      end;
+   if contador = 0 then
+      writeln('No existen coches con ese distintivo')
+   else
+      writeln('Hay ', contador, 'coches con ese distintivo');
 
 end;
 

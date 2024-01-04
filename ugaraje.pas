@@ -18,12 +18,6 @@ TYPE
   tGaraje =  ARRAY [PisoIni..PisoFin,PlazaIni..PlazaFin] of tPlaza;
   tFichero = FILE OF tGaraje;
 
-  PROCEDURE EntradaVehiculo(VAR fichero: tFichero);
-  PROCEDURE CrearGarajeVacio(VAR garaje: tGaraje);
-  PROCEDURE MostrarGaraje(garaje:tGaraje);
-  PROCEDURE PorcentajeOcupacion(garaje:tGaraje);
-  PROCEDURE Distintivo(VAR coche: tCoche, VAR distintivo: string);
-
 
   //RELATIVOS A PLAZA
   tPlaza = RECORD
@@ -36,11 +30,6 @@ TYPE
       gananciaTotal: real;
   END;
 
-  PROCEDURE PonerPlazaVacia(VAR plaza:tPlaza; aux: integer; aux1: integer);
-  PROCEDURE Aparcar(VAR plaza:tPlaza; VAR coche: tCoche);
-  PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer; VAR tGanancias: tGanancias);
-
-
   //RELATIVO A COCHE
   intervalo = 1..4;
   tCoche = RECORD
@@ -49,13 +38,28 @@ TYPE
 
   END;
 
-  PROCEDURE AsignarCoche(VAR coche1: tCoche; VAR coche2: tCoche);
-  PROCEDURE CrearCoche(VAR coche: tCoche; VAR numMat: string;VAR distintivo: string);
+  fich = FILE OF tGaraje;
 
+  //RELATIVO A GARAJE
+  PROCEDURE MostrarGaraje(garaje:tGaraje);
+  PROCEDURE PorcentajeOcupacion(garaje:tGaraje);
+  //PROCEDURE Distintivo(VAR coche: tCoche; VAR distintivo: string);
+
+  //RELATIVO A PLAZA
+  PROCEDURE PonerPlazaVacia(VAR plaza:tPlaza; aux: integer; aux1: integer);
+  PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer; VAR tGanancias: tGanancias);
+
+  //RELATIVO A COCHE
+  PROCEDURE AsignarCoche(VAR coche1: tCoche; VAR coche2: tCoche);
+  PROCEDURE CrearCoche(VAR garaje: tGaraje; VAR numMat: string;VAR distintivo: string; tamanio: boolean; VAR fichero: fich);
+  FUNCTION ComprobarMat(numMat: string): boolean;
+
+VAR
+    ficheroAntiguosUsers: Text;
 
 implementation
 
-
+ {
 PROCEDURE CrearGarajeVacio(VAR garaje: tGaraje);
 VAR
   aux,aux1: integer;
@@ -69,7 +73,7 @@ BEGIN
 
           end;
       end;
-END;
+END; }
 
 PROCEDURE MostrarGaraje(garaje:tGaraje);
 VAR
@@ -143,7 +147,8 @@ VAR
   aux,aux1, cont, cont2: integer; //cont1 numerador, cont2 denominador
   porcentaje: real;
 BEGIN
-  cont, cont2 := 0;
+  cont:= 0;
+  cont2 := 0;
   for aux:= 4 downto 1 do
       begin
 
@@ -156,41 +161,13 @@ BEGIN
 
           end;
       end;
-  porcentaje := cont1 / 80;
+  porcentaje := (cont / 80);
 END;
 
 
-PROCEDURE BuscarPlaza(garaje: tGaraje);
-VAR
-  aux,aux1: integer;
-BEGIN
-  HayPlazas := false;
-  REPEAT
-    aux := aux -1;
-    REPEAT
-      aux1 := aux1 + 1;
-      IF (garaje[aux, aux1].ocupado = false) THEN
-         if (tamanio = 'grande') then begin
-             if (((aux-1)*20+aux1) mod 6 = 0)then //es grande
-                HayPlazas := true
-                Aparcar(plaza, coche, tamanio, aux, aux1);
-             else
-                HayPlazas := false;
-         end
-         else
-             if (((aux-1)*20+aux1) mod 6 <> 0)then //es pequenio
-                HayPlazas := true
-             else
-                HayPlazas := false;
-
-    until (aux1 = 20) OR (garaje[aux, aux1].ocupado = false);
-  until (aux = 4) OR (garaje[aux, aux1].ocupado = false);
-
-end;
 
 
-
-PROCEDURE Distintivo(VAR garaje:tGaraje, VAR distintivo: string);
+PROCEDURE Distintivo(VAR garaje:tGaraje; VAR distintivo: string);
 VAR
   aux,aux1,contador: integer;
 begin
@@ -227,17 +204,6 @@ BEGIN
       plaza.tamanio:= false;
 END;
 
-PROCEDURE Aparcar(VAR plaza:tPlaza; VAR coche: tCoche; VAR tamanio: string);
-VAR
-  aux, aux1: integer;
-BEGIN
-  IF tamanio =  THEN BEGIN
-
-  plaza.ocupado:= true;
-  AsignarCoche(plaza.coche,coche);
-END;
-
-end;
 
 PROCEDURE Salir(VAR plaza:tPlaza; VAR matricula: String; aux: integer; aux1: integer; VAR tGanancias: tGanancias); //ojo con si es grande o pequenia que es diferente precio
 VAR
@@ -287,13 +253,97 @@ BEGIN
 END;
 
 
-PROCEDURE CrearCoche(VAR coche: tCoche; VAR numMat: string;VAR distintivo: string);
+PROCEDURE CrearCoche(VAR garaje: tGaraje; VAR numMat: string;VAR distintivo: string; tamanio: boolean; VAR fichero: fich);
+VAR
+   aux, aux1: integer;
 
 BEGIN
-  coche.numMatricula:= numMat;
-  coche.distintivo:= distintivo;
+
+
+   {$I-}
+   RESET(fichero);
+   {$I+}
+   if (IOResult = 0) then begin
+
+   FOR aux := 4 DOWNTO 1 DO
+       FOR aux1 := 1 TO 20 DO
+           IF tamanio THEN BEGIN
+
+             IF (garaje[aux, aux1].tamanio) THEN BEGIN
+               IF (garaje[aux, aux1].ocupado = false) THEN BEGIN
+                  garaje[aux, aux1].coche.numMatricula:= numMat;
+                  garaje[aux, aux1].coche.distintivo:= distintivo;
+                  garaje[aux, aux1].tamanio:= tamanio;
+                  garaje[aux, aux1].ocupado:= true;
+
+               END;
+             END;
+           END
+           ELSE
+               IF (garaje[aux, aux1].tamanio = false) THEN BEGIN
+                 IF (garaje[aux, aux1].ocupado = false) THEN BEGIN
+                    garaje[aux, aux1].coche.numMatricula:= numMat;
+                    garaje[aux, aux1].coche.distintivo:= distintivo;
+                    garaje[aux, aux1].tamanio:= tamanio;
+                    garaje[aux, aux1].ocupado:= true;
+                 END;
+               END;
+
+    write(fichero, garaje);
+    end
+   else
+       REWRITE(fichero);
+
+   close(fichero);
 END;
 
+
+FUNCTION ComprobarMat(numMat: string): boolean;
+VAR
+   caracter: char;
+   aux: integer;
+BEGIN
+  ComprobarMat := true;
+
+  IF length(numMat) <> 7 THEN
+     ComprobarMat := false
+  ELSE BEGIN
+    FOR aux:= 1 TO 4 DO BEGIN
+        caracter := numMat[aux];
+        IF NOT (caracter IN ['0'..'9']) THEN
+           ComprobarMat := false
+       END;
+    FOR aux:= 5 TO 7 DO BEGIN
+        caracter := numMat[aux];
+        IF NOT (caracter IN ['A'..'Z', 'a'..'z']) THEN
+           ComprobarMat := false;
+   END;
+    IF ComprobarMat = false THEN
+       writeln('Escriba un formato correcto de matricula');
+
+END;
+
+PROCEDURE Descuento(VAR numMat: string; VAR ficheroAntiguosUsers: Text);
+VAR
+   aux: string[7];
+BEGIN
+  {$I-}
+   RESET(ficheroAntiguosUsers);
+  {$I+}
+   IF (IOResult = 0) THEN BEGIN
+    WHILE NOT EOF DO
+          readln(ficheroAntiguosUsuarios, aux);
+          IF aux = numMat THEN
+               writeln('ENHORABUENA! Eres VIP. Tienes un descuento del 20%');
+          //hacemos salir pero con el 20%
+
+
+
+
+END;
+
+
+{
 PROCEDURE SacarCoche(VAR coche: tCoche);
 VAR
   minutos: integer;
@@ -305,7 +355,7 @@ BEGIN
 
 
 
-END;
-
+END; }
+end;
 end.
 

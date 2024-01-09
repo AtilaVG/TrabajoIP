@@ -1,44 +1,19 @@
 program IP_Practica6;
 
-{$mode objfpc}{$H+}
-
 uses
-  dos,SysUtils,Ugaraje,Ucoche,Uplaza,Classes;
-
-TYPE
-  //RELATIVO A GARAJE
-  tGaraje =  ARRAY [PisoIni..PisoFin,PlazaIni..PlazaFin] of tPlaza;
-  tFichero = FILE OF tGaraje;
-
-  //RELATIVO A PLAZA
-  tPlaza = RECORD
-    tamanio: boolean; //1 grande y 0 pequenia
-    ocupado: boolean;
-    coche: tCoche;
-  END;
-
-  tGanancias = RECORD
-      gananciaTotal: real;
-  END;
-
-  //RELATIVO A COCHE
-  intervalo = 1..4;
-  tCoche = RECORD
-    numMatricula: String[7];
-    distintivo: string[20];
-
-  END;
-
-  fich = FILE OF tGaraje;
+  dos,SysUtils,ugaraje, Classes;
 
 VAR
   garaje:tGaraje;
+  ganancia: tGanancias;
   opcion, minutos, tamanioCoche: integer;
   numMat: string[7];
-  distintivo: string[20];
+  distintivo: AnsiString;
   fichero: fich;
   ficheroAntiguosUsers: Text;
-  tamanio: boolean;
+  tamanio, comprobar: boolean;
+  numMatConcat: AnsiString;
+  precioTotal: real;
 
 
 PROCEDURE Menu();
@@ -61,13 +36,16 @@ END;
 
 begin
 
+  randomize;
+
   ASSIGN(fichero, 'datos.dat');
   ASSIGN(ficheroAntiguosUsers, 'antiguos.txt');
+
+  InicializarGaraje(garaje, fichero);
 
   REPEAT
     Menu();
     readln(opcion);
-    IF (opcion <> 8) THEN BEGIN
       CASE opcion OF
            1: BEGIN
               writeln('Escribe si el coche es grande(1) o pequenio(0)');
@@ -76,39 +54,69 @@ begin
                 tamanio := true
               ELSE
                 tamanio := false;
-               //IF HayPlazas(garaje, tamanio) THEN BEGIN
+               IF HayPlazas(garaje, tamanio, fichero) THEN BEGIN
+                  MostrarGaraje(garaje, fichero);
                   writeln('Introduce la matricula');
                   REPEAT
                     readln(numMat);
                     ComprobarMat(numMat);
                   UNTIL ComprobarMat(numMat) = true;
-
+                    numMatConcat := numMat;
                     writeln('Introduce el distintivo');
                     readln(distintivo);
-                    CrearCoche(garaje, numMat, distintivo, tamanio, fichero);
-                    //Aparcar(plaza, coche, tamanioCoche);
+                    BuscarPlaza(garaje, numMatConcat, distintivo, tamanio, fichero);
+                    //CrearCoche(garaje, numMatConcat, distintivo, tamanio, fichero, aux, aux1) ;
+                    //Aparcar(plaza, coche, tamanioCoche)
+                 END
 
 
-                END
                 ELSE
                     writeln('En este momento no hay plazas libres en el garaje');
+           END;
 
-           end;
-           {
-           2: readln(tamanioCoche);
-              readln(minutos);
-             Salir(plaza, matricula, aux, aux1);
-           3: MostrarGaraje(garaje);
-           4: ;
-           5: ;
-           6: ;
-           7: ; BEGIN
+
+           2: BEGIN
+               writeln('Escribe la matricula de tu coche');
+               readln(numMatConcat);
+               writeln('Escribe los minutos que has estado aparcado');
+               readln(minutos);
+               writeln('Escribe el tamanio de tu coche');
+               readln(tamanioCoche);
+               IF tamanioCoche = 1 THEN
+                  tamanio := true
+               ELSE
+               tamanio := false;
+               Salir(numMatConcat, minutos, tamanio, fichero, ganancia);
+              END;
+
+           3: MostrarGaraje(garaje, fichero);
+           4: PorcentajeOcupacion(garaje, fichero);
+           5: BEGIN
+                   writeln('Escriba el distintivo que desea buscar');
+                   readln(distintivo);
+                   Pepe(garaje, distintivo, fichero);
+              END;
+           6: BEGIN
+                 comprobar := true;
+                 //ganancia.gananciaTotal := 6;
+                 Ganancias(ganancia, precioTotal, comprobar);
+              end;
+           7:  BEGIN
                      writeln('Escribe la matricula de tu coche');
-                     readln(numMat);
-                     Descuento(numMat, fichero);
-                END;}
+                     readln(numMatConcat);
+                     writeln('Escribe los minutos que has estado aparcado');
+                     readln(minutos);
+                     writeln('Escribe el tamanio de tu coche');
+                     readln(tamanioCoche);
+                     IF tamanioCoche = 1 THEN
+                        tamanio := true
+                     ELSE
+                         tamanio := false;
+                     Descuento(numMatConcat, minutos, tamanio, ficheroAntiguosUsers, fichero, ganancia);
+                END;
       end;
-    end;
+
+
 
   UNTIL (opcion = 8);
 readln();

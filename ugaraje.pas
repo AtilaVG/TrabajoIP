@@ -551,6 +551,8 @@ BEGIN
     WHILE (NOT EOF(ficheroAntiguosUsers)) DO BEGIN
           read(ficheroAntiguosUsers, aux);
           IF aux = numMat THEN BEGIN
+               PonerPlazaVacia(garaje[aux,aux1],aux,aux1);
+               write(fichero,garaje);
                writeln('ENHORABUENA! Eres VIP. Tienes un descuento del 20%');
                IF tamanio THEN
                   precioTotal := 0.02 * minutos

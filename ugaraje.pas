@@ -551,14 +551,12 @@ BEGIN
     WHILE (NOT EOF(ficheroAntiguosUsers)) DO BEGIN
           read(ficheroAntiguosUsers, aux);
           IF aux = numMat THEN BEGIN
-               PonerPlazaVacia(garaje[aux,aux1],aux,aux1);
-               write(fichero,garaje);
                writeln('ENHORABUENA! Eres VIP. Tienes un descuento del 20%');
                IF tamanio THEN
                   precioTotal := 0.02 * minutos
                ELSE
                   precioTotal := 0.01 * minutos;
-               break;
+
           END
           ELSE
           BEGIN
@@ -577,6 +575,9 @@ BEGIN
 
       FOR i := 4 DOWNTO 1 DO BEGIN
          FOR j := 1 TO 20 DO BEGIN
+            IF (garaje[i,j].coche.numMatricula = numMat) THEN BEGIN
+            PonerPlazaVacia(garaje[i,j],i,j);
+            write(fichero,garaje);
              IF tamanio THEN BEGIN
                IF (garaje[i, j].tamanio) THEN BEGIN
                  IF (garaje[i, j].coche.numMatricula = numMat) THEN BEGIN
@@ -584,9 +585,11 @@ BEGIN
                  END;
                END;
              END;
+            end;
+            end;
           END;
       END;
-    END;
+
 
     aleatorioStr := numMat + '-' + aleatorioStr + '.txt';
     ASSIGN(fich, aleatorioStr);

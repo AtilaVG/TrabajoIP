@@ -14,6 +14,8 @@ VAR
   tamanio, comprobar: boolean;
   numMatConcat: AnsiString;
   precioTotal: real;
+  num: integer;
+  opciondistintivo: integer;
 
 
 PROCEDURE Menu();
@@ -40,7 +42,9 @@ begin
 
   ASSIGN(fichero, 'datos.dat');
   ASSIGN(ficheroAntiguosUsers, 'antiguos.txt');
-
+  writeln('Tienes el fichero datos creado? no(0) si(1)');
+  readln(num);
+  IF num = 0 THEN
   InicializarGaraje(garaje, fichero);
 
   REPEAT
@@ -55,15 +59,25 @@ begin
               ELSE
                 tamanio := false;
                IF HayPlazas(garaje, tamanio, fichero) THEN BEGIN
-                  MostrarGaraje(garaje, fichero);
                   writeln('Introduce la matricula');
                   REPEAT
                     readln(numMat);
                     ComprobarMat(numMat);
                   UNTIL ComprobarMat(numMat) = true;
                     numMatConcat := numMat;
-                    writeln('Introduce el distintivo');
-                    readln(distintivo);
+                    writeln('Introduce el distintivo:');
+                    writeln('1: 0 emisiones');
+                    writeln('2: ECO');
+                    writeln('3: C');
+                    writeln('4: B');
+                    readln(opciondistintivo);
+
+                    case  opciondistintivo  of
+                         1: distintivo:= '0 emisiones';
+                         2: distintivo:= 'ECO';
+                         3: distintivo:= 'C';
+                         4: distintivo:= 'B';
+                    end;
                     BuscarPlaza(garaje, numMatConcat, distintivo, tamanio, fichero);
                     //CrearCoche(garaje, numMatConcat, distintivo, tamanio, fichero, aux, aux1) ;
                     //Aparcar(plaza, coche, tamanioCoche)
@@ -80,12 +94,12 @@ begin
                readln(numMatConcat);
                writeln('Escribe los minutos que has estado aparcado');
                readln(minutos);
-               writeln('Escribe el tamanio de tu coche');
+               writeln('Escribe si el coche es grande(1) o pequenio(0)');
                readln(tamanioCoche);
                IF tamanioCoche = 1 THEN
                   tamanio := true
                ELSE
-               tamanio := false;
+                  tamanio := false;
                Salir(numMatConcat, minutos, tamanio, fichero, ganancia);
               END;
 

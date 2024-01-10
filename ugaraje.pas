@@ -106,8 +106,12 @@ BEGIN
   end
   else
       REWRITE(fichero);
+  write(fichero,garaje);
+  close(fichero);
 
 END;
+
+
 
 
 PROCEDURE MostrarGaraje(garaje:tGaraje; VAR fichero: fich);
@@ -128,15 +132,15 @@ BEGIN
                 begin
                      if(garaje[aux,aux1].tamanio) then begin
                      if (garaje[aux,aux1].ocupado) then
-                        write('| X | ')
+                        write('| X |')
                      else
-                        write('|   | ');
+                        write('|   |');
                      end
                      else begin
                         if (garaje[aux,aux1].ocupado) then
-                          write('|x| ')
+                          write('|x|')
                        else
-                          write('| | ');
+                          write('| |');
                      end;
                      if (aux1 = 20) then
                      writeln;
@@ -155,8 +159,9 @@ END;
 FUNCTION HayPlazas(VAR garaje: tGaraje; VAR tamanio: boolean; VAR fichero: fich): boolean; //comprobar si funciona
 VAR
   aux,aux1: integer;
+  found: boolean;
 BEGIN
-
+  found:= false;
   aux := 0;
   aux1 := 1;
 
@@ -179,7 +184,7 @@ BEGIN
          if (tamanio) then begin
              if (((aux-1)*20+aux1) mod 6 = 0)then begin //es grande
                 HayPlazas := true;
-                break;
+                found:= true;
              end
              else
                 HayPlazas := false;
@@ -187,10 +192,9 @@ BEGIN
          else BEGIN
              if (((aux-1)*20+aux1) mod 6 <> 0)then begin //es pequenio
                 HayPlazas := true ;
-                break;
+                found:= true;
              end
              else BEGIN
-                write('se mete en else');
                 HayPlazas := false;
              END;
 
@@ -198,9 +202,9 @@ BEGIN
 
       end;
       aux1 := aux1 + 1;
-    until (aux1 = 20) OR (garaje[aux, aux1].ocupado = false);
+    until (aux1 = 20) OR (found);
     aux := aux +1;
-  until (aux = 4) OR (garaje[aux, aux1].ocupado = false);
+  until (aux = 1) OR (found);
 
 end
   else
@@ -209,62 +213,57 @@ end
 end;
 
 
-PROCEDURE BuscarPlaza(VAR garaje: tGaraje; VAR numMat: string; VAR distintivo: string; VAR tamanio: boolean; VAR fichero: fich); //comprobar si funciona
+PROCEDURE BuscarPlaza(VAR garaje: tGaraje; VAR numMat: string; VAR distintivo: string; VAR tamanio: boolean; VAR fichero: fich);
 VAR
-  aux,aux1: integer;
+  aux, aux1: integer;
+  found: boolean;
 BEGIN
-
-  aux := 4;
+  found := false;
+  aux := 1;
   aux1 := 1;
 
   {$I-}
-        RESET(fichero);
+  RESET(fichero);
   {$I+}
-  IF IORESULT = 0 THEN BEGIN
+  IF IORESULT <> 0 THEN
+     rewrite(fichero);
 
-  SEEK(fichero, 0);
-  WHILE (NOT EOF(fichero)) DO
-       read(fichero, garaje);
-  REPEAT
-
+    SEEK(fichero, 0);
+    WHILE (NOT EOF(fichero)) DO
+      read(fichero, garaje);
     REPEAT
+      REPEAT
+        IF (garaje[aux, aux1].ocupado <> true) THEN BEGIN
+          if (tamanio) then begin
+            if (((aux-1)*20+aux1) mod 6 = 0)then begin //es grande
+              CrearCoche(garaje, numMat, distintivo, tamanio, fichero,  aux, aux1);
+              found:= true;
+            end
+            else
+              begin
+                // Handle the case where the parking space doesn't match the criteria
+              end;
+          end
+          else BEGIN
+            if (((aux-1)*20+aux1) mod 6 <> 0)then begin //es pequeño
+              CrearCoche(garaje, numMat, distintivo, tamanio, fichero,  aux, aux1);
+              found:= true;
+            end
+            else BEGIN
+              // Handle the case where the parking space doesn't match the criteria
+            END;
+          end;
+        end;
+        aux1 := aux1 + 1;
+      until (aux1 = 20) OR (found);
+      aux := aux + 1;
+    until (aux = 4) OR (found);
 
-
-      IF (garaje[aux, aux1].ocupado <> true) THEN  BEGIN
-         if (tamanio) then begin
-             if (((aux-1)*20+aux1) mod 6 = 0)then begin //es grande
-                CrearCoche(garaje, numMat, distintivo, tamanio, fichero,  aux, aux1);
-                break;
-             end
-             else
-                begin
-
-                end;
-         end
-         else BEGIN
-             if (((aux-1)*20+aux1) mod 6 <> 0)then begin //es pequenio
-                CrearCoche(garaje, numMat, distintivo, tamanio, fichero,  aux, aux1);
-                break;
-             end
-             else BEGIN
-                begin
-
-                end;
-             END;
-
-         end;
-
-      end;
-      aux1 := aux1 + 1;
-    until (aux1 = 20) OR (garaje[aux, aux1].ocupado = false);
-    aux := aux -1;
-  until (aux = 4) OR (garaje[aux, aux1].ocupado = false);
-
-end
-  else
-      rewrite(fichero);
+  // Close the file before leaving the procedure
   close(fichero);
-end;
+END;
+
+
 
 
 PROCEDURE PorcentajeOcupacion(garaje:tGaraje; VAR fichero: fich);
@@ -359,7 +358,7 @@ END;
 
 PROCEDURE Salir(VAR numMat: string; VAR minutos: integer; VAR tamanio: boolean; VAR fichero: fich; VAR ganancia: tGanancias); //ojo con si es grande o pequenia que es diferente precio
 VAR
-   aux: string[7];
+   aux,aux1: integer;
    precioTotal: real;
    i, j, aleatorio: integer;
    fich: Text;
@@ -373,7 +372,6 @@ BEGIN
 
   comprobar := false;
 
-  aux := '';
   aleatorio := random(10000) + 1;
   aleatorioStr := IntToStr(aleatorio);
 
@@ -381,28 +379,36 @@ BEGIN
         RESET(fichero);
   {$I+}
   IF IORESULT = 0 THEN BEGIN
-  WHILE (NOT EOF(fichero)) DO BEGIN
-    IF aux = numMat THEN BEGIN
-      IF (minutos > 60) THEN BEGIN
+  WHILE (NOT EOF(fichero)) DO
+        read(fichero, garaje);
+ FOR aux:= 1 to 4 do begin
+     FOR aux1:= 1 to 20 do begin
+         IF (garaje[aux,aux1].coche.numMatricula = numMat) THEN BEGIN
+            PonerPlazaVacia(garaje[aux,aux1],aux,aux1);
+            write(fichero,garaje);
 
-         IF tamanio THEN
-            precioTotal := 0.02 * minutos
-         ELSE
-            precioTotal := 0.01 * minutos;
-         break;
-      END
-      ELSE
-          IF tamanio THEN
-            precioTotal := 0.04 * minutos
-         ELSE
-            precioTotal := 0.06 * minutos;
-            break;
+            IF (minutos > 60) THEN BEGIN
 
+               IF tamanio THEN
+                  precioTotal := 0.02 * minutos
+               ELSE
+                   precioTotal := 0.01 * minutos;
+
+            END
+         ELSE BEGIN
+             IF tamanio THEN
+                precioTotal := 0.04 * minutos
+             ELSE
+                 precioTotal := 0.06 * minutos;
+         END;
+
+         END;
     END;
-  END;
+ END;
+
 
       Ganancias(ganancia, precioTotal, comprobar);
-      read(fichero, garaje);
+
 
       FOR i := 4 DOWNTO 1 DO BEGIN
          FOR j := 1 TO 20 DO BEGIN
@@ -416,6 +422,8 @@ BEGIN
           END;
       END;
     END;
+
+  close(fichero);
 
     aleatorioStr := numMat + '-' + aleatorioStr + '.txt';
     ASSIGN(fich, aleatorioStr);
@@ -461,13 +469,10 @@ PROCEDURE CrearCoche(VAR garaje: tGaraje; VAR numMat: string;VAR distintivo: str
 
 BEGIN
 
-   {$I-}
-   RESET(fichero);
-   {$I+}
+
    if (IORESULT = 0) then begin
 
            IF tamanio THEN BEGIN
-           write('HOLA');
 
              IF (garaje[aux, aux1].tamanio) THEN BEGIN
                IF (garaje[aux, aux1].ocupado = false) THEN BEGIN
@@ -495,7 +500,6 @@ BEGIN
    else
        REWRITE(fichero);
 
-   close(fichero);
 END;
 
 
